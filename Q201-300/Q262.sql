@@ -1,3 +1,4 @@
+-- Method 1
 select t1.Day, round(ifnull(t2.Cancell / t1.total, 0), 2) as 'Cancellation Rate'
 from (select a.Request_at as Day, count(Id) as total
       from Trips a,
@@ -22,4 +23,19 @@ from (select a.Request_at as Day, count(Id) as total
         and (a.Status regexp '^cancelled.*$')
       group by a.Request_at) t2
      on t1.Day = t2.Day
+;
+
+
+-- Method 2
+select a.Request_at                                                       as Day,
+       round(sum(if(a.Status regexp '^cancell.*$', 1, 0)) / count(ID), 2) as 'Cancellation Rate'
+from Trips a,
+     Users b,
+     Users c
+where a.Client_Id = b.Users_ID
+  and a.Driver_Id = c.Users_ID
+  and b.Banned = 'No'
+  and c.Banned = 'No'
+  and (date(a.Request_at) between '2013-10-1' and '2013-10-3')
+group by a.Request_at
 ;
